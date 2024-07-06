@@ -1,0 +1,25 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.calonex.seller",
+      "sha256_cert_fingerprints": [
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C",
+        "E8:C9:6E:87:2F:81:EB:16:CF:7C:1E:14:4D:BA:2B:45:91:B2:F7:2C:63:F0:CD:26:D2:AE:86:07:21:B1:3E:3C"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.calonex.customer",
+      "sha256_cert_fingerprints": [
+        "3D:D5:91:AC:BA:E8:07:9D:B8:C0:FA:B5:9D:E6:D7:D3:44:74:1E:E7:04:5A:BF:6A:D4:08:98:8F:32:7F:06:2D",
+        "33:D4:BA:43:D5:B6:60:15:4B:6A:93:F8:C3:87:C2:92:16:59:D4:0F:8F:24:0A:C7:F8:43:C9:DC:CB:BB:2D:09",
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C"
+      ]
+    }
+  }
+]

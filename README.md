@@ -1,2 +1,1 @@
-# students-community-ui
-UI for students community app
+## Student's Community App
