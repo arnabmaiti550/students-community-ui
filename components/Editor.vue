@@ -9,7 +9,7 @@
     >
       <div :class="{ 'col-span-12 md:col-span-6': isPost }">
         <label v-if="isPost">Description:</label>
-        <div id="editor" class="tex2jax_ignore mathjax-ignore" />
+        <div :id="editorId" class="tex2jax_ignore mathjax-ignore" />
       </div>
 
       <div :class="{ 'col-span-12 md:col-span-6 md:-mt-10 mt-4': isPost }">
@@ -35,6 +35,10 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
+  },
+  editorId: {
+    type: String,
+    default: "editor",
   },
 });
 let quill;
@@ -105,7 +109,7 @@ onMounted(async () => {
 
     // Check if Quill is loaded
     if (typeof Quill !== "undefined") {
-      quill = new Quill("#editor", {
+      quill = new Quill("#" + props.editorId, {
         modules: {
           syntax: true,
           toolbar: toolbarOptions,

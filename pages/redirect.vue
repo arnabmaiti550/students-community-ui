@@ -1,4 +1,4 @@
-<template>Redirectig...</template>
+<template><div>Redirectig...</div></template>
 <script setup>
 const authStore = useAuthStore();
 const { userInfo } = storeToRefs(authStore);

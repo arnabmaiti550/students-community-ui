@@ -1,32 +1,41 @@
 export default defineNuxtConfig({
+  components: {
+    global: true,
+    dirs: ["~/components"],
+  },
+
   devtools: { enabled: true },
   css: ["@/assets/css/main.css"],
-  modules: [
 
+  modules: [
     "@nuxt/ui",
     "nuxt-typed-router",
-    "@nuxtjs/i18n",
     "nuxt-viewport",
     "@pinia/nuxt",
     "@pinia-plugin-persistedstate/nuxt",
     "nuxt-vuefire",
   ],
+
   pinia: {
     storesDirs: ["./stores/**", "./custom-folder/stores/**"],
   },
+
   ui: {
     icons: ["heroicons"],
     safelistColors: ["primary", "secondary"],
   },
+
   piniaPersistedstate: {
     cookieOptions: {
       sameSite: "strict",
     },
     storage: "localStorage",
   },
+
   imports: {
     dirs: ["stores", "composables/**"],
   },
+
   runtimeConfig: {
     public: {
       API_BASE_URL: process.env.API_BASE_URL,
@@ -37,6 +46,7 @@ export default defineNuxtConfig({
 
     },
   },
+
   vuefire: {
     config: {
       apiKey: process.env.FIREBASE_API_KEY,
@@ -45,8 +55,11 @@ export default defineNuxtConfig({
       appId: process.env.FIREBASE_APP_ID,
     },
   },
+
   colorMode: {
     preference: 'light'
   },
+
   plugins: [],
+  compatibilityDate: "2024-07-07",
 });

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+BUILD_ENV=${BUILD_TYPE:-development}
+cp ./env

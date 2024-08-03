@@ -132,6 +132,7 @@ export default {
 };
 </script>
 <script setup>
+import "css-pro-layout/dist/css/css-pro-layout.css";
 const runtimeConfig = useRuntimeConfig();
 const authStore = useAuthStore();
 const { token, loggedIn } = storeToRefs(authStore);
@@ -143,10 +144,7 @@ useHead({
       rel: "stylesheet",
       href: "https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css",
     },
-    {
-      rel: "stylesheet",
-      href: "https://unpkg.com/css-pro-layout/dist/css/css-pro-layout.min.css",
-    },
+
     {
       rel: "stylesheet",
       href: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css",
@@ -226,10 +224,6 @@ function navigateToTopic(topic) {
   router.push(`/${url}/${topic._id}`);
 }
 onMounted(async () => {
-  try {
-    await authStore.getUserInfo();
-    if (loggedIn.value) router.push("/redirect");
-  } catch (err) {}
   // window.MathJax.tex = {
   //   inlineMath: [
   //     ["$", "$"],

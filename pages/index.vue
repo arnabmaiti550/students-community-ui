@@ -29,6 +29,8 @@
 <script setup>
 const text = ref("");
 const runtimeConfig = useRuntimeConfig();
+const authStore = useAuthStore();
+const { token, loggedIn } = storeToRefs(authStore);
 function reRender() {
   if (MathJax) {
     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
@@ -39,5 +41,11 @@ watch(text, () => {
   nextTick().then(() => {
     reRender(); // Assuming reRender is defined somewhere
   });
+});
+onMounted(async () => {
+  try {
+    await authStore.getUserInfo();
+    if (loggedIn.value) router.push("/redirect");
+  } catch (err) {}
 });
 </script>

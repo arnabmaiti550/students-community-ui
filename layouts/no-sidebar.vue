@@ -12,7 +12,7 @@
         variant="solid"
         @click="setToggled()"
       />
-      <span class="editor">STUDENTS COMMUNITY</span>
+      <span class="editor">ASK LEARN GROW</span>
     </aside>
     <div class="overlay" v-on:click="setToggled()"></div>
     <div class="layout">
@@ -248,7 +248,7 @@ a.btn:hover {
 }
 .editor {
   font-size: 20px;
-  letter-spacing: 1rem;
+  letter-spacing: 0.5rem;
   margin: 10px;
   display: inline-block;
   text-orientation: upright;

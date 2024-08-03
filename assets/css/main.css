@@ -129,7 +129,7 @@ blockquote{
   font-weight: 550;
   color: #242424;
   font-size: 0.9rem;
-  border-bottom: 1px solid #e3e3e3;
+  /* border-bottom: 1px solid #e3e3e3; */
   padding-bottom: 1rem;
 }
 .preview-area .ql-code-block-container select{
@@ -159,7 +159,7 @@ div[id^="headlessui-listbox-options"]{
 }
 .footer-x{
   padding:1rem 15px;
-  border-top: 1px solid #e3e3e3;
+  /* border-top: 1px solid #e3e3e3; */
   font-weight: 550;
   color: #242424;
   font-size: 0.9rem;

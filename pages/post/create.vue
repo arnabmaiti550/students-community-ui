@@ -67,9 +67,6 @@
     </div>
   </div>
 </template>
-<script>
-export default {};
-</script>
 
 <script setup>
 import base64 from "base-64";
