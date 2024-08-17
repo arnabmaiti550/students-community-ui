@@ -10,6 +10,7 @@
             class="border-b text-blue-400 border-gray-200 dark:border-gray-700"
             :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
             icon="i-heroicons-academic-cap"
+            @click="fetchSubject(item)"
           >
             <span class="truncate text-gray-700"> {{ item.name }}</span>
             <template #trailing>
@@ -23,7 +24,7 @@
         </template>
 
         <template #item="{ item }">
-          <UAccordion multiple :items="item.subjects">
+          <UAccordion multiple :items="subjects[item._id]">
             <template #default="{ item, open }">
               <UButton
                 color="gray"
@@ -31,6 +32,7 @@
                 class="border-b ml-4 text-cyan-400 border-gray-200 dark:border-yellow-600"
                 :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
                 icon="i-heroicons-book-open"
+                @click="fetchTopic(item)"
               >
                 <span class="truncate text-gray-600"> {{ item.name }}</span>
                 <template #trailing>
@@ -43,7 +45,11 @@
               </UButton>
             </template>
             <template #item="{ item }">
-              <div v-for="(topic, i) in item.topics" :key="i" class="w-full">
+              <div
+                v-for="(topic, i) in topics[item._id]"
+                :key="i"
+                class="w-full"
+              >
                 <UButton
                   color="gray"
                   variant="ghost"
@@ -74,12 +80,19 @@
           <div class="col-span-12 md:col-span-8">
             <slot />
           </div>
-          <div class="col-span-12 md:col-span-4 hidden md:block">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus
-            quae similique quia tempore nemo enim, illum adipisci corrupti nisi
-            ullam quasi, vel animi repellendus maxime. Totam pariatur velit
-            officia maiores? Inline math: \(a^2 + b^2 = c^2\) $$\int_0^\infty
-            e^{-x^2} dx$$
+          <div
+            v-if="userInfo.name"
+            class="col-span-12 md:col-span-4 hidden md:block text-4xl text-gray-400 font-bold leading-normal tracking-wide"
+          >
+            Welcome, <br />
+            {{ userInfo.name }}<br />
+            XP {{ userInfo.xp }}
+          </div>
+          <div
+            v-else
+            class="col-span-12 md:col-span-4 hidden md:block text-4xl text-gray-400 font-bold leading-normal tracking-wide"
+          >
+            Welcome to Student's Community
           </div>
         </div>
       </main>
@@ -100,7 +113,8 @@
 <script>
 import { storeToRefs } from "pinia";
 const subjectStore = useSubjectStore();
-const { departmentTree } = storeToRefs(subjectStore);
+const { departmentTree, departments, subjects, topics } =
+  storeToRefs(subjectStore);
 
 export default {
   name: "Default",
@@ -109,11 +123,7 @@ export default {
     toggled: false,
     rtl: false,
   }),
-  computed: {
-    departments() {
-      return departmentTree.value;
-    },
-  },
+  computed: {},
   methods: {
     setCollapsed() {
       this.collapsed = !this.collapsed;
@@ -125,17 +135,13 @@ export default {
       this.rtl = !this.rtl;
     },
   },
-
-  async mounted() {
-    await subjectStore.fetchDepartmentAction();
-  },
 };
 </script>
 <script setup>
 import "css-pro-layout/dist/css/css-pro-layout.css";
 const runtimeConfig = useRuntimeConfig();
 const authStore = useAuthStore();
-const { token, loggedIn } = storeToRefs(authStore);
+const { token, loggedIn, userInfo } = storeToRefs(authStore);
 const router = useRouter();
 
 useHead({
@@ -217,24 +223,21 @@ const slugify = (str) =>
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
 function navigateToTopic(topic) {
-  const dep = slugify(topic.department);
-  const sub = slugify(topic.subject);
+  console.log(topic);
+  const dep = slugify(topic.subject?.department?.name || "");
+  const sub = slugify(topic.subject?.name || "");
   const top = slugify(topic.name);
   const url = `${dep}+${sub}+${top}`;
   router.push(`/${url}/${topic._id}`);
 }
+function fetchSubject(item) {
+  subjectStore.fetchSubjectsAction(item._id);
+}
+function fetchTopic(item) {
+  subjectStore.fetchTopicsAction(item._id);
+}
 onMounted(async () => {
-  // window.MathJax.tex = {
-  //   inlineMath: [
-  //     ["$", "$"],
-  //     ["\\(", "\\)"],
-  //   ],
-  // };
-
-  // window.MathJax.options = {
-  //   skipHtmlTags: ["script", "noscript", "style", "textarea", "pre"],
-  //   processHtmlClass: "math-content",
-  // };
+  subjectStore.fetchDepartmentsAction();
 
   updateMathJax();
   // renderMathInElement(document.body, {

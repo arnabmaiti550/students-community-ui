@@ -3,13 +3,16 @@ import {
     loginApi,
     getMe,
     logout,
-    registerApi
+    registerApi,
+    updateProfile,
+    getUserById
 } from '@/services/auth'
 
 export const useAuthStore = defineStore("authStore", {
     state: () => ({
         googleInfo: {},
         userInfo: {},
+        userById: {},
         token: '',
         loggedIn: false,
     }),
@@ -22,14 +25,16 @@ export const useAuthStore = defineStore("authStore", {
                 this.googleInfo = payload;
                 this.token = resp.data?.token;
 
-                this.signInConfigure()
-                await this.getUserInfo()
-                if (this.token)
+                if (this.token) {
+
+                    this.signInConfigure()
+                    await this.getUserInfo()
                     this.loggedIn = true
+                }
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -45,7 +50,19 @@ export const useAuthStore = defineStore("authStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async updateProfileAction(payload) {
+            try {
+                const resp = await updateProfile(payload);
+
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -59,7 +76,7 @@ export const useAuthStore = defineStore("authStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -85,7 +102,20 @@ export const useAuthStore = defineStore("authStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async getUserInfoById(id) {
+            try {
+                const resp = await getUserById(id);
+
+                this.userById = resp.data.data;
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }

@@ -27,7 +27,9 @@
     "nuxt-typed-router": "^3.6.3",
     "nuxt-viewport": "^2.1.5",
     "nuxt-vuefire": "^0.3.0",
+    "quill-upload": "^0.0.9",
     "v-calendar": "^3.1.2",
+    "vue-toast-notification": "3",
     "vue3-smooth-dnd": "^0.0.6",
     "vuefire": "^3.1.17"
   },

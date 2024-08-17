@@ -1,7 +1,8 @@
 <template>
+  <SignIn />
   <div class="flex flex-col md:flex-row space-x-4">
     <div
-      v-if="test.status != 'PUBLISH'"
+      v-if="test.status == 'DRAFT'"
       class="bg-white p-4 overflow-x pb-6 md:w-3/5"
     >
       <h3
@@ -109,8 +110,20 @@
 
     <div class="md:w-2/5">
       <h3 class="font-bold text-xl">{{ test.title }}</h3>
-      Full Marks- {{ test.fullMarks }}
-      <div v-html="test.description"></div>
+      <div class="flex justify-between items-center">
+        <span>Full Marks- {{ test.fullMarks }} </span>
+        <span>
+          Time- {{ hours ? hours + " hours : " : ""
+          }}{{ minutes ? minutes + " minutes" : "" }}
+          <UButton
+            icon="i-heroicons-pencil-square"
+            size="sm"
+            color="white"
+            class="text-gray-600"
+            variant="solid"
+            @click="isOpen = true"
+        /></span>
+      </div>
 
       <div class="p-4 flex flex-col space-y-4 bg-white">
         <div v-for="(q, i) in test.questions" :key="i" class="border-b pb-4">
@@ -160,7 +173,7 @@
               Marks: <span class="text-green-500"> {{ q.marks }}</span> |
               <span class="text-red-500">- {{ q.negative }}</span>
             </div>
-            <div class="space-x-2" v-if="test.status != 'PUBLISH'">
+            <div class="space-x-2" v-if="test.status == 'DRAFT'">
               <UButton
                 icon="i-heroicons-arrow-up-on-square"
                 size="sm"
@@ -197,17 +210,17 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 mt-4" v-if="test.status != 'PUBLISH'">
+        <div class="grid grid-cols-1 mt-4" v-if="test.status == 'DRAFT'">
           <div class="flex justify-center gap-3">
             <UButton
               class="w-32 justify-center"
               size="lg"
               color="green"
               square
+              v-if="test.questions.length"
               variant="solid"
-              :disabled="loading || invalidForm"
               :loading="loading"
-              @click="publishTest"
+              @click="confirmationPopup = true"
               label="Publish"
             />
           </div>
@@ -229,6 +242,13 @@
           >
             Test Information
           </h3>
+          <UButton
+            color="red"
+            variant="ghost"
+            icon="i-heroicons-x-mark-20-solid"
+            class="-my-1"
+            @click="isOpen = false"
+          />
         </div>
       </template>
 
@@ -267,6 +287,12 @@
         <UFormGroup class="mb-4">
           <UInput v-model="title" placeholder="Title *" />
         </UFormGroup>
+        <UFormGroup class="mb-4">
+          <UInput v-model="hours" placeholder="Hours" />
+        </UFormGroup>
+        <UFormGroup class="mb-4">
+          <UInput v-model="minutes" placeholder="Minutes" />
+        </UFormGroup>
       </ULandingCard>
       <label>Description </label>
       <editor editorId="testDescription" ref="testDescription" />
@@ -277,13 +303,57 @@
             <UButton
               class="w-32 justify-center"
               size="lg"
-              color="cyan"
+              color="gray"
               square
               variant="solid"
-              :disabled="loading || invalidForm"
               :loading="loading"
               @click="submitTest"
-              label="Create"
+              label="Save"
+            />
+          </div>
+        </div>
+      </ULandingCard>
+    </UCard>
+  </UModal>
+  <UModal v-model="confirmationPopup" prevent-close :ui="{ width: 'sm' }">
+    <UCard
+      :ui="{
+        ring: '',
+        divide: 'divide-y divide-gray-100 dark:divide-gray-800',
+      }"
+    >
+      <template #header>
+        <div class="flex items-center justify-between">
+          <h3
+            class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
+          >
+            CONFIRMATION
+          </h3>
+          <UButton
+            color="red"
+            variant="ghost"
+            icon="i-heroicons-x-mark-20-solid"
+            class="-my-1"
+            @click="confirmationPopup = false"
+          />
+        </div>
+      </template>
+
+      <ULandingCard class="mb-4">
+        Are you sure you want to publish? You won't be able to modify later.
+      </ULandingCard>
+      <ULandingCard>
+        <div class="grid grid-cols-1 mt-4">
+          <div class="flex justify-center gap-3">
+            <UButton
+              class="w-32 justify-center"
+              size="lg"
+              color="gray"
+              square
+              variant="solid"
+              :loading="loading"
+              @click="publishTest"
+              label="Save"
             />
           </div>
         </div>
@@ -293,6 +363,7 @@
 </template>
 <script setup>
 import base64 from "base-64";
+import moment from "moment";
 definePageMeta({
   layout: "no-sidebar",
 });
@@ -300,7 +371,7 @@ const testStore = useTestStore();
 const subjectStore = useSubjectStore();
 const { departments, subjects, topics } = storeToRefs(subjectStore);
 const { test } = storeToRefs(testStore);
-
+const { $toast } = useNuxtApp();
 const department = ref("");
 const subject = ref("");
 const topic = ref("");
@@ -309,7 +380,9 @@ const questionRef = ref();
 const solutionRef = ref();
 const router = useRouter();
 const route = useRoute();
-
+const hours = ref();
+const minutes = ref();
+const confirmationPopup = ref(false);
 const type = ref("MCQ");
 const questionTypes = ["MCQ", "MSQ", "NAT"];
 const options = ref([
@@ -319,6 +392,7 @@ const options = ref([
 const marks = ref();
 const negative = ref(0.0);
 const isOpen = ref(false);
+const loading = ref(false);
 const title = ref("");
 const selected = ref(0);
 const questions = ref([]);
@@ -343,14 +417,22 @@ function removeOption() {
 
 async function submitTest() {
   const id = route.params.id;
+  testDescription.value ? testDescription.value.getEditorContent() : null;
   editIndex.value = null;
   const payload = {
-    // department: department.value,
-    // title: title.value,
-    // description: base64.encode(testDescription.value?.editorHtml),
-    // descriptionData: testDescription.value?.editorContent,
+    department: department.value,
+    title: title.value,
+
+    time: moment
+      .duration({ hours: hours.value, minutes: minutes.value })
+      .asSeconds(),
     status: status.value,
   };
+
+  if (testDescription.value?.editorHtml) {
+    payload.description = base64.encode(testDescription.value?.editorHtml);
+    payload.descriptionData = testDescription.value?.editorContent;
+  }
   if (tempQuestions.value.length)
     payload.questions = [...tempQuestions.value].map((el) => {
       const regex =
@@ -364,18 +446,31 @@ async function submitTest() {
       return el;
     });
 
-  if (subject.value.length) payload.subject = subject.value;
-  if (topic.value.length) payload.topic = topic.value;
-
-  await testStore.updateTestAction({ id, payload });
+  if (subject.value?.length) payload.subject = subject.value;
+  if (topic.value?.length) payload.topic = topic.value;
+  try {
+    loading.value = true;
+    await testStore.updateTestAction({ id, payload });
+    isOpen.value = false;
+    await testStore.fetchTestAction(route.params.id);
+    questions.value = test.value.questions;
+    tempQuestions.value = [];
+    reRender();
+    $toast.success("Saved as Draft");
+  } catch (err) {
+    $toast.error(err.message);
+    throw Error(err.message);
+  }
+  loading.value = false;
 }
 async function publishTest() {
   const id = route.params.id;
   const payload = {
     status: "PUBLISH",
   };
-
+  loading.value = true;
   await testStore.updateTestAction({ id, payload });
+  loading.value = false;
   router.push(`/test`);
 }
 async function addQuestion() {
@@ -386,6 +481,15 @@ async function addQuestion() {
       .filter((el) => el.correct)
       .map((el) => el.value);
   }
+  if (type.value !== "NAT" && options.value.length < 2) {
+    $toast.error("Atleast 2 options needed");
+    return;
+  }
+  if (!optionKeys.value.length && answer.value === "") {
+    $toast.error("Answer not selected");
+    return;
+  }
+
   const questionObj = {
     type: type.value,
     question: questionRef.value.editorHtml,
@@ -403,6 +507,7 @@ async function addQuestion() {
   if (editIndex.value) tempQuestions.value[editIndex.value] = questionObj;
   else tempQuestions.value.push(questionObj);
   try {
+    loading.value = true;
     await submitTest();
     type.value = "";
     marks.value = "";
@@ -417,15 +522,21 @@ async function addQuestion() {
       { value: 0, label: "", correct: false },
       { value: 1, label: "", correct: false },
     ];
+
+    await testStore.fetchTestAction(route.params.id);
+    questions.value = test.value.questions;
+    reRender();
   } catch (err) {
-    console.log("something went wrong while adding question", err);
+    $toast.error(err.message);
   }
-  await testStore.fetchTestAction(route.params.id);
-  questions.value = test.value.questions;
-  reRender();
+  loading.value = false;
 }
 function updateLabel() {
   console.log(options.value);
+}
+function clearTopic() {
+  subject.value = "";
+  topic.value = "";
 }
 async function moveUp(i) {
   if (i < 1) return;
@@ -435,10 +546,6 @@ async function moveUp(i) {
   tempQuestions.value[i] = alter;
   tempQuestions.value[i - 1] = temp;
   await submitTest();
-  await testStore.fetchTestAction(route.params.id);
-  questions.value = test.value.questions;
-  tempQuestions.value = [];
-  reRender();
 }
 async function moveDown(i) {
   if (i > questions.value - 2) return;
@@ -448,19 +555,11 @@ async function moveDown(i) {
   tempQuestions.value[i] = alter;
   tempQuestions.value[i + 1] = temp;
   await submitTest();
-  await testStore.fetchTestAction(route.params.id);
-  questions.value = test.value.questions;
-  tempQuestions.value = [];
-  reRender();
 }
 async function deleteQuestion(i) {
   tempQuestions.value = [...questions.value];
   tempQuestions.value.splice(i, 1);
   await submitTest();
-  await testStore.fetchTestAction(route.params.id);
-  questions.value = test.value.questions;
-  tempQuestions.value = [];
-  reRender();
 }
 async function setQuestion(i) {
   editIndex.value = i;
@@ -492,10 +591,30 @@ watch(department, (val) => {
 watch(subject, (val) => {
   subjectStore.fetchTopicsAction(val);
 });
+watch(type, (val) => {
+  answer.value = "";
+  optionKeys.value = [];
+});
+watch(isOpen, (val) => {
+  if (val)
+    setTimeout(() => {
+      testDescription.value.setEditorContent(test.value.descriptionData);
+    }, 100);
+});
 onMounted(async () => {
   subjectStore.fetchDepartmentsAction();
   await testStore.fetchTestAction(route.params.id);
+  department.value = test.value.department;
+  subject.value = test.value.subject;
+  topic.value = test.value.topic;
+  title.value = test.value.title;
+  if (test.value.time) {
+    const temp = moment.duration(test.value.time, "seconds");
+    hours.value = temp.hours();
+    minutes.value = temp.minutes();
+  }
   questions.value = test.value.questions;
+
   reRender();
 });
 </script>

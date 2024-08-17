@@ -4,7 +4,12 @@ import {
     getTests,
     getMyTests,
     editTest,
-    getTestById
+    getTestById,
+    getTestByIdLtd,
+    submitTest,
+    getTestResult,
+    getAttemptedTests,
+    deleteTest
 } from '@/services/tests'
 import base64 from "base-64";
 
@@ -12,6 +17,7 @@ export const useTestStore = defineStore("testStore", {
     state: () => ({
         tests: [],
         myTests: [],
+        attemptedTests: [],
         pageIndex: 1,
         currentTopic: '',
         test: {},
@@ -26,7 +32,18 @@ export const useTestStore = defineStore("testStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async deleteTestAction(payload) {
+            try {
+                const resp = await deleteTest(payload);
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -37,23 +54,39 @@ export const useTestStore = defineStore("testStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
         },
         async fetchTestsAction(payload, reload = false) {
             try {
-                if (reload || this.currentTopic != payload.topic) { this.posts = []; this.currentTopic = payload.topic }
-                if (payload.page * 10 > this.posts.length) {
+                if (reload || this.currentTopic != payload?.topic) { this.tests = []; this.currentTopic = payload?.topic }
+                if (payload?.page || 1 * 10 > this.tests.length) {
                     const resp = await getTests(payload);
-                    const datas = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
-                    this.tests = [...this.posts, ...datas]
+                    const datas = resp.data.data
+                    this.tests = [...this.tests, ...datas]
                     return resp.data;
                 }
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async fetchAttemptedTestsAction(payload, reload = false) {
+            try {
+                if (reload) { this.attemptedTests = []; }
+                if (payload?.page || 1 * 10 > this.attemptedTests.length) {
+                    const resp = await getAttemptedTests(payload);
+                    const datas = resp.data.data
+                    this.attemptedTests = [...this.attemptedTests, ...datas]
+                    return resp.data;
+                }
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -65,7 +98,7 @@ export const useTestStore = defineStore("testStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -74,7 +107,12 @@ export const useTestStore = defineStore("testStore", {
             try {
                 const resp = await getTestById(id);
                 let temp = resp.data.data;
-                temp.description = base64.decode(temp.description)
+                const regex =
+                    /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
+                temp.description = regex.test(temp.description)
+                    ? base64.decode(temp.description)
+                    : temp.description;
+
                 temp.questions = temp.questions
                     .map(el => {
                         el.question = base64.decode(el.question) || el.question;
@@ -85,11 +123,33 @@ export const useTestStore = defineStore("testStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
         },
+
+        async fetchTestLtdAction(id) {
+            try {
+                const resp = await getTestByIdLtd(id);
+                let temp = resp.data.data;
+                temp.description = base64.decode(temp.description)
+                temp.questions = temp.questions
+                    .map(el => {
+                        el.question = base64.decode(el.question) || el.question;
+
+                        return el;
+                    });
+                this.test = temp
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+
         async fetchSubjectsAction(id) {
             try {
                 if (this.subjects[id]?.length > 0) return this.subjects[id]
@@ -99,7 +159,7 @@ export const useTestStore = defineStore("testStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -113,68 +173,39 @@ export const useTestStore = defineStore("testStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
         },
-        async getPostByIdAction(payload) {
+        async submitTestAction(payload) {
             try {
-                const resp = await getPostById(payload);
-                this.post = resp.data.data
-                this.post.body = base64.decode(this.post.body) || this.post.body
+                const resp = await submitTest(payload);
+
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
         },
-        async getDetailPostByIdAction(payload) {
+        async fetchTestResultAction(id) {
             try {
-                const resp = await getDetailPostById(payload);
-                this.post = resp.data.data
-                this.post.body = base64.decode(this.post.body) || this.post.body
+                const resp = await getTestResult(id);
+                let temp = resp.data.data;
+                temp.description = base64.decode(temp.description)
+                temp.questions = temp.questions
+                    .map(el => {
+                        el.question = base64.decode(el.question) || el.question;
+                        el.solution = base64.decode(el.solution) || el.solution;
+                        return el;
+                    });
+                this.test = temp
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
-                    `Api failed with error: ${error.message}`
-                );
-            }
-        },
-        async editPostAction(payload) {
-            try {
-                const resp = await editPost(payload);
-                return resp.data;
-            } catch (error) {
-                throw Error(
-                    error?.response?.data?.message ||
-                    `Api failed with error: ${error.message}`
-                );
-            }
-        },
-        async addReplyAction(payload) {
-            try {
-                const resp = await addReply(payload);
-                return resp.data;
-            } catch (error) {
-                throw Error(
-                    error?.response?.data?.message ||
-                    `Api failed with error: ${error.message}`
-                );
-            }
-        },
-        async getReplyAction(id) {
-            try {
-                this.replies = [];
-                const resp = await getReply(id);
-                this.replies = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
-                return resp.data;
-            } catch (error) {
-                throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -185,7 +216,7 @@ export const useTestStore = defineStore("testStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }

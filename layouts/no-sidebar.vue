@@ -10,7 +10,7 @@
         color="white"
         square
         variant="solid"
-        @click="setToggled()"
+        @click="router.push(`/redirect`)"
       />
       <span class="editor">ASK LEARN GROW</span>
     </aside>

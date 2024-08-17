@@ -1,22 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center">
-    <div
-      class="bg-white rounded-2xl shadow-lg flex flex-col text-center w-full max-w-xl overflow-hidden"
-    >
-      <div class="text-xl mt-4">Welcome to Student's community</div>
-      <ClientOnly>
-        <div class="w-full p-8">
-          <div
-            class="p-3 border border-gray-200 flex space-x-3 justify-center cursor-pointer"
-            @click="socialSignup"
-          >
-            <img src="@/assets/icons/google-icon.svg" alt="Google Logo" />
-            <h4>Login with Google</h4>
-          </div>
-        </div></ClientOnly
-      >
-    </div>
-  </div>
+  <SignIn />
 </template>
 
 <script setup>
@@ -30,6 +13,7 @@ definePageMeta({
 });
 
 const authStore = useAuthStore();
+const { loggedIn } = storeToRefs(authStore);
 const email = ref("");
 const password = ref("");
 const router = useRouter();
@@ -77,6 +61,9 @@ async function singUpHandle(res) {
     router.push(`/redirect`);
   }
 }
+onMounted(() => {
+  if (loggedIn.value) router.push(`/redirect`);
+});
 </script>
 
 <style scoped>

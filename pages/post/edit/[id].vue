@@ -1,4 +1,5 @@
 <template>
+  <SignIn />
   <div class="">
     <div class="bg-white p-4 overflow-x pb-6">
       <h3

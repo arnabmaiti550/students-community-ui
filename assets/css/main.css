@@ -49,7 +49,9 @@ font-size: 96% !important;
      font-size: 80% !important;
   }
 }
-
+html {
+  scroll-behavior: smooth;
+}
 body {
   font-family: "Open Sans";
 }
@@ -197,4 +199,19 @@ padding-bottom: 6px;
   overflow-x: hidden;
   overflow-y: auto;
 } */
+}
+.ql-video video{
+  max-height: 300px !important;
+  width: 100%;
+}
+.ql-image {
+  max-height: 400px;
+  max-width: 100%;
+  display: inline-block;
+}
+ .ql-editor blockquote {
+    border-left: 4px solid #ccc;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding-left: 16px;
 }

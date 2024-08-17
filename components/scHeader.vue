@@ -116,6 +116,9 @@ const loginItems = [
     {
       label: "Profile",
       icon: "i-heroicons-cog-8-tooth",
+      click: () => {
+        router.push(`/profile`);
+      },
     },
   ],
   [

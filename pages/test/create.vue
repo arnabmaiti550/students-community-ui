@@ -1,4 +1,5 @@
 <template>
+  <SignIn />
   <div class="flex flex-col md:flex-row">
     <UModal
       v-model="isOpen"
@@ -56,6 +57,12 @@
           <UFormGroup class="mb-4">
             <UInput v-model="title" placeholder="Title *" />
           </UFormGroup>
+          <UFormGroup class="mb-4">
+            <UInput v-model="hours" placeholder="Hours" />
+          </UFormGroup>
+          <UFormGroup class="mb-4">
+            <UInput v-model="minutes" placeholder="Minutes" />
+          </UFormGroup>
         </ULandingCard>
         <label>Description </label>
         <editor editorId="testDescription" ref="testDescription" />
@@ -66,13 +73,12 @@
               <UButton
                 class="w-32 justify-center"
                 size="lg"
-                color="cyan"
+                color="gray"
                 square
                 variant="solid"
-                :disabled="loading || invalidForm"
                 :loading="loading"
                 @click="submitTest"
-                label="Create"
+                label="Save"
               />
             </div>
           </div>
@@ -83,6 +89,7 @@
 </template>
 <script setup>
 import base64 from "base-64";
+import moment from "moment";
 definePageMeta({
   layout: "no-sidebar",
 });
@@ -94,7 +101,7 @@ const subject = ref("");
 const topic = ref("");
 const testDescription = ref();
 const router = useRouter();
-
+const { $toast } = useNuxtApp();
 const type = ref("");
 const questionTypes = ["MCQ", "MSQ", "NAT"];
 const options = ref([
@@ -106,6 +113,10 @@ const negative = ref(0.0);
 const isOpen = ref(true);
 const selected = ref(0);
 const title = ref("");
+
+const hours = ref();
+const minutes = ref();
+const loading = ref(false);
 function addOption() {
   options.value = [
     ...options.value,
@@ -118,15 +129,30 @@ function removeOption() {
   options.value.splice(i, 1);
 }
 async function submitTest() {
+  testDescription.value.getEditorContent();
+
   const payload = {
     department: department.value,
     title: title.value,
-    description: base64.encode(testDescription.value.editorHtml),
+
+    time: moment
+      .duration({ hours: hours.value, minutes: minutes.value })
+      .asSeconds(),
   };
+
+  payload.description = base64.encode(testDescription.value?.editorHtml);
+  payload.descriptionData = testDescription.value?.editorContent;
+
   if (subject.value.length) payload.subject = subject.value;
   if (topic.value.length) payload.topic = topic.value;
-  const resp = await testStore.createTestAction(payload);
-  router.push(`/test/edit/${resp.data._id}`);
+  try {
+    loading.value = true;
+    const resp = await testStore.createTestAction(payload);
+    router.push(`/test/edit/${resp.data._id}`);
+  } catch (err) {
+    $toast.error(err.message);
+  }
+  loading.value = false;
 }
 watch(department, (val) => {
   subjectStore.fetchSubjectsAction(val);

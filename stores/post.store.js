@@ -7,7 +7,10 @@ import {
     addReply,
     getDetailPostById,
     editPost,
-    likeUnlike
+    likeUnlike,
+    uploadFile,
+    deleteFile,
+    editReply, deleteReply, getMyPosts, deletePost
 } from '@/services/post'
 import base64 from "base-64";
 
@@ -28,7 +31,18 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async uploadFileAction(payload) {
+            try {
+                const resp = await uploadFile(payload);
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.message ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -44,7 +58,23 @@ export const usePostStore = defineStore("postStore", {
                 }
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async fetchMyPostsAction(payload, reload = false) {
+            try {
+                if (reload) { this.posts = []; }
+                if (payload.page * 20 > this.posts.length) {
+                    const resp = await getMyPosts(payload);
+                    const datas = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
+                    this.posts = [...this.posts, ...datas]
+                    return resp.data;
+                }
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -58,7 +88,7 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -72,7 +102,7 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -85,7 +115,7 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -98,7 +128,7 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -109,7 +139,18 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async deletePostAction(payload) {
+            try {
+                const resp = await deletePost(payload);
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -120,7 +161,7 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -133,7 +174,29 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async editReplyAction(payload) {
+            try {
+                const resp = await editReply(payload);
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async deleteReplyAction(payload) {
+            try {
+                const resp = await deleteReply(payload);
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }
@@ -144,7 +207,18 @@ export const usePostStore = defineStore("postStore", {
                 return resp.data;
             } catch (error) {
                 throw Error(
-                    error?.response?.data?.message ||
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async deleteFileAction(payload) {
+            try {
+                const resp = await deleteFile(payload);
+                return resp.data;
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
                     `Api failed with error: ${error.message}`
                 );
             }

@@ -39,14 +39,19 @@
           ></div>
         </div>
         <div class="footer-x flex justify-between items-center">
-          <div class="flex space-x-2 text-xs">
-            <span class="text-[#396791] cursor-pointer flex items-center">
-              <UIcon name="i-heroicons-user" />
+          <div class="flex space-x-2 text-xs flex items-center">
+            <span
+              class="text-[#396791] cursor-pointer flex items-center"
+              @click="router.push(`/profile/${post.author?._id}`)"
+            >
+              <UAvatar
+                size="xs"
+                icon="i-heroicons-user-circle"
+                :src="post.author?.profile"
+              />
               &nbsp;{{ post.author.name }}</span
             >
-            <span class="text-gray-400 font-light"
-              >&#128949; {{ getFormattedDate(post.createdAt) }}</span
-            >
+            <span class="text-gray-400 font-light">{{ post.createdAt }}</span>
           </div>
 
           <div class="flex space-x-3">
@@ -78,6 +83,7 @@ const load = ref(1);
 const filter = ref("newest");
 const filterOptions = [
   { label: "Newest", value: "newest" },
+  { label: "Oldest", value: "oldest" },
   { label: "Most Popular", value: "most_popular" },
 ];
 const pageIndex = ref(1);
@@ -125,7 +131,7 @@ async function getPostsList(reload) {
     await postStore.fetchPostsAction(payload, reload);
     reRender();
 
-    const item = document.getElementById(`post-${pageIndex.value * 10 - 3}`);
+    const item = document.getElementById(`post-${pageIndex.value * 10 - 1}`);
     console.log(item);
     if (item) {
       observer.observe(item);

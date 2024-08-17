@@ -25,6 +25,11 @@
 </template>
 <script setup>
 import { debounce } from "lodash";
+
+const runtimeConfig = useRuntimeConfig();
+// register quill-upload
+
+const postStore = usePostStore();
 const props = defineProps({
   isPost: {
     type: Boolean,
@@ -44,7 +49,11 @@ const props = defineProps({
 let quill;
 const editorContent = ref("");
 const editorHtml = ref("");
+const tempVideo = ref("");
+const setContent = ref(false);
 let updateHandler;
+let currentMedia = [];
+
 const toolbarOptions = [
   ["bold", "italic", "underline", "strike"], // toggled buttons
   ["blockquote", "code-block"],
@@ -78,16 +87,16 @@ const getEditorContent = () => {
 
 // Method to set the editor content
 const setEditorContent = (data) => {
-  console.log("shshsh");
+  setContent.value = true;
   if (quill) {
-    console.log("shshsh");
-    const content = [
-      { insert: "Hello World!\n" },
-      { insert: "This is a test.", attributes: { bold: true } },
-    ];
     quill.setContents(data);
   }
+  setContent.value = false;
 };
+function isBase64DataURI(str) {
+  const base64Pattern = /^data:image\/(png|jpg|jpeg|gif|bmp|webp);base64,/;
+  return base64Pattern.test(str);
+}
 function reRender() {
   editorHtml.value = quill.root.innerHTML;
   if (MathJax && MathJax.Hub) {
@@ -98,6 +107,43 @@ function reRender() {
     }, 200);
   }
 }
+function base64ToFile(base64String, fileName) {
+  const base64Pattern = /^data:(.+);base64,/;
+  const matches = base64String.match(base64Pattern);
+
+  if (!matches) {
+    throw new Error("Invalid base64 string");
+  }
+
+  const mimeType = matches[1];
+  const base64Data = base64String.replace(base64Pattern, "");
+
+  // Convert the base64 string to a byte array
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+
+  // Create a Blob from the byte array
+  const blob = new Blob([byteArray], { type: mimeType });
+
+  // Convert the Blob to a File
+  const file = new File([blob], fileName, { type: mimeType });
+
+  return file;
+}
+function isValidUrl(string) {
+  try {
+    new URL(string);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 onMounted(async () => {
   updateHandler = debounce(reRender, 400);
   try {
@@ -106,21 +152,162 @@ onMounted(async () => {
       "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"
     );
     await loadScript("https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js");
-
+    const { ImageHandler, VideoHandler, AttachmentHandler } = await import(
+      "quill-upload"
+    );
     // Check if Quill is loaded
     if (typeof Quill !== "undefined") {
+      const Video = Quill.import("formats/video");
+      const Link = Quill.import("formats/link");
+      const Image = Quill.import("formats/image");
+      console.log(Image);
+      class CoustomVideo extends Video {
+        static create(value) {
+          // console.log(tempVideo.value, value);
+          const url = isValidUrl(value) ? value : value.url;
+          if (!url) return;
+          const node = super.create(url);
+
+          const video = document.createElement("video");
+          video.setAttribute("controls", true);
+          video.setAttribute("id", Math.floor(Math.random() * 299));
+          video.setAttribute("style", "max-height: 400px; width: 100%");
+
+          // Create a source element
+          const source = document.createElement("source");
+          source.setAttribute("src", url);
+          source.setAttribute("type", "video/mp4");
+
+          // Append the source to the video
+          video.appendChild(source);
+
+          // Append the video to the node
+          node.appendChild(video);
+
+          return node;
+        }
+
+        static sanitize(url) {
+          return Link.sanitize(url);
+        }
+      }
+      CoustomVideo.blotName = "video";
+      CoustomVideo.className = "ql-video";
+      CoustomVideo.tagName = "DIV";
+      class CoustomImage extends Image {
+        static create(value) {
+          console.log(value instanceof File || value instanceof Blob, value);
+          if (isBase64DataURI(value)) {
+            uploadImage(base64ToFile(value, "my-image"));
+            return;
+          }
+          const url = isValidUrl(value) ? value : value.url;
+          if (!url) return;
+          const node = super.create(url);
+
+          const video = document.createElement("img");
+
+          video.setAttribute("id", Math.floor(Math.random() * 299));
+
+          // Create a source element
+
+          video.setAttribute("src", url);
+
+          // Append the video to the node
+          node.appendChild(video);
+
+          return node;
+        }
+
+        static sanitize(url) {
+          return Link.sanitize(url);
+        }
+      }
+      CoustomImage.blotName = "image";
+      CoustomImage.className = "ql-image";
+      CoustomImage.tagName = "img";
+
+      Quill.register("formats/video", CoustomVideo);
+      Quill.register("formats/video", CoustomImage);
+      Quill.register("modules/imageHandler", ImageHandler);
+      Quill.register("modules/videoHandler", VideoHandler);
+      Quill.register("modules/attachmentHandler", AttachmentHandler);
+
       quill = new Quill("#" + props.editorId, {
         modules: {
           syntax: true,
           toolbar: toolbarOptions,
+          imageHandler: {
+            upload: async (file) => {
+              try {
+                const data = await fileUploader(file);
+                const url = runtimeConfig.public.STORAGE_URL + data.data;
+                const range = quill.getSelection();
+                quill.insertEmbed(range.index, "image", {
+                  url: url,
+                });
+                quill.setSelection(range.index + 1);
+                return url;
+              } catch (err) {
+                console.log(err);
+              }
+            },
+          },
+          videoHandler: {
+            upload: async (file) => {
+              try {
+                const data = await fileUploader(file);
+                tempVideo.value = runtimeConfig.public.STORAGE_URL + data.data;
+
+                const range = quill.getSelection();
+                quill.insertEmbed(range.index, "video", {
+                  url: tempVideo.value,
+                });
+                quill.setSelection(range.index + 1);
+                tempVideo.value = "";
+                return runtimeConfig.public.STORAGE_URL + data.data;
+              } catch (err) {
+                console.log(err);
+              }
+            },
+          },
+          attachmentHandler: {
+            upload: async (file) => {
+              try {
+                const data = await fileUploader(file);
+                return runtimeConfig.public.STORAGE_URL + data.data;
+              } catch (err) {
+                console.log(err);
+              }
+            },
+          },
         },
 
         theme: "snow",
       });
 
       // Enable syntax highlighting
-      quill.on("text-change", () => {
+      quill.on("text-change", (delta, oldDelta, source) => {
         updateHandler();
+        if (!setContent.value) {
+          const editor = document.querySelector("#" + props.editorId);
+          const images = Array.from(editor.querySelectorAll("img"));
+          const videos = Array.from(editor.querySelectorAll("video source"));
+          const newMedia = [...images, ...videos].map((el) =>
+            el.getAttribute("src")
+          );
+          currentMedia = newMedia;
+          currentMedia.forEach((src) => {
+            if (!newMedia.includes(src)) {
+              const url = src.replace(
+                runtimeConfig.public.STORAGE_URL,
+                "/upload/"
+              );
+              postStore.deleteFileAction(url);
+            }
+          });
+        }
+
         const blocks = document.querySelectorAll("pre code");
         blocks.forEach((block) => {
           hljs.highlightElement(block);
@@ -133,6 +320,20 @@ onMounted(async () => {
     console.error("Error loading scripts:", error);
   }
 });
+async function uploadImage(file) {
+  const data = await fileUploader(file);
+  const url = runtimeConfig.public.STORAGE_URL + data.data;
+  const range = quill.getSelection();
+  quill.insertEmbed(range.index, "image", {
+    url: url,
+  });
+  quill.setSelection(range.index + 1);
+}
+async function fileUploader(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  return await postStore.uploadFileAction(formData);
+}
 watch(
   () => props.title,
   (val) => {

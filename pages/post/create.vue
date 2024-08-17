@@ -1,4 +1,5 @@
 <template>
+  <SignIn />
   <div class="">
     <div class="bg-white p-4 overflow-x pb-6">
       <h3
@@ -43,17 +44,9 @@
           option-attribute="name"
         />
       </div>
-      <h3 class="my-2">Verify Guidelines:</h3>
-      <div class="flex flex-col space-y-2 font-semibold text-black">
-        <UCheckbox
-          label="This post does not contain any explicit contents, and strictly releted to the topic."
-        />
-        <UCheckbox label="This post is not promotional or spam." />
-        <UCheckbox label="This post is related to study and education." />
-        <UCheckbox
-          label="I understand that violation of the above mentioned statements will result in termination of my account."
-        />
-      </div>
+      <h3 class="my-2 mt-6 font-bold text-cyan-700 text-sm">
+        Make sure to follow Guidelines.
+      </h3>
 
       <UButton
         color="green"
@@ -61,6 +54,7 @@
         variant="solid"
         @click="submitPost"
         block
+        :loading="loading"
         class="mx-auto w-[200px] mt-4"
         >Post Now</UButton
       >
@@ -73,6 +67,7 @@ import base64 from "base-64";
 definePageMeta({
   layout: "no-sidebar",
 });
+const { $toast } = useNuxtApp();
 const department = ref("");
 const subject = ref("");
 const topic = ref("");
@@ -81,6 +76,8 @@ const subjectStore = useSubjectStore();
 const postStore = usePostStore();
 const { departments, subjects, topics } = storeToRefs(subjectStore);
 const title = ref("");
+const router = useRouter();
+const loading = ref(false);
 async function submitPost() {
   try {
     editorRef.value.getEditorContent();
@@ -91,9 +88,13 @@ async function submitPost() {
       body: encodedContent,
       editorData: editorRef.value.editorContent,
     };
+    loading.value = true;
     const resp = await postStore.createPostAction(payload);
-    console.log(resp);
-  } catch (err) {}
+    router.push(`/post/${resp.data._id}/${resp.data.slug}`);
+  } catch (err) {
+    $toast.error(err.message);
+  }
+  loading.value = false;
 }
 watch(department, (val) => {
   subjectStore.fetchSubjectsAction(val);

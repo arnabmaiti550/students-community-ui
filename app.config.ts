@@ -4,10 +4,12 @@
 //       secondary: 'customYellow',
 //     }
 //   })
-  
+
 export default defineAppConfig({
-    // theme: {
-    //     primaryColor: '#172557',
-    //     secondaryColor: '#F9BD1D'
-    // }
+    ui: {
+        notifications: {
+            // Show toasts at the top right of the screen
+            position: 'top-0 right-0'
+        }
+    }
 })
