@@ -1,5 +1,5 @@
 # Use the official Node.js image.
-FROM node:16
+FROM node:18
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN yarn install 
+RUN yarn install --production
 
 # Copy the rest of the application code to the container
 COPY . .
