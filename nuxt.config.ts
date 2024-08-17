@@ -39,10 +39,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       API_BASE_URL: process.env.BASE_URL,
-      APP_TENANT: process.env.APP_TENANT,
       APP_GOOGLE_CLIENT_ID: process.env.APP_GOOGLE_CLIENT_ID,
-      APP_CASHFREE_ENVIRONMENT: process.env.APP_CASHFREE_ENVIRONMENT,
-      GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
       STORAGE_URL: process.env.STORAGE_URL,
     },
   },
