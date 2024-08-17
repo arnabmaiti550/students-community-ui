@@ -56,6 +56,7 @@ watch(text, () => {
   });
 });
 onMounted(async () => {
+  console.log(runtimeConfig.public.API_BASE_URL, process.env.API_BASE_URL);
   try {
     await authStore.getUserInfo();
     if (loggedIn.value) router.push("/redirect");
