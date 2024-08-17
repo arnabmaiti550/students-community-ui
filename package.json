@@ -28,12 +28,22 @@
     "nuxt-viewport": "^2.1.5",
     "nuxt-vuefire": "^0.3.0",
     "quill-upload": "^0.0.9",
+    "students-community": "file:",
     "v-calendar": "^3.1.2",
     "vue-toast-notification": "3",
     "vue3-smooth-dnd": "^0.0.6",
-    "vuefire": "^3.1.17",
+    "vuefire": "^3.1.17"
+  },
+  "devDependencies": {
+    "@element-plus/nuxt": "^1.0.5",
+    "@nuxt/devtools": "^0.8.3",
+    "@nuxtjs/device": "^3.1.0",
+    "@nuxtjs/i18n": "^8.0.0-beta.13",
+    "@nuxtjs/moment": "^1.6.1",
     "@pinia-plugin-persistedstate/nuxt": "^1.1.1",
     "@types/node": "^18.17.0",
+    "@unlok-co/nuxt-stripe": "^2.0.0",
+    "element-plus": "^2.3.12",
     "husky": "^8.0.0",
     "lint-staged": "^14.0.1",
     "nuxt": "3.11.2",
@@ -43,16 +53,7 @@
     "react-dom": "^18.2.0",
     "sass": "^1.77.5",
     "storybook": "^7.4.1",
-    "@nuxtjs/device": "^3.1.0",
     "typescript": "^5.1.6"
-  },
-  "devDependencies": {
-    "@element-plus/nuxt": "^1.0.5",
-    "@nuxt/devtools": "^0.8.3",
-    "@nuxtjs/i18n": "^8.0.0-beta.13",
-    "@nuxtjs/moment": "^1.6.1",
-    "@unlok-co/nuxt-stripe": "^2.0.0",
-    "element-plus": "^2.3.12"
   },
   "engines": {
     "node": ">=16.20.2"
