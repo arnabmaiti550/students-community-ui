@@ -1,5 +1,4 @@
 <template>
-  <SignIn />
   <div class="min-h-[80vh] flex items-center justify-center">
     <div
       class="bg-white rounded-md shadow-lg flex flex-col items-center w-full max-w-xl h-full overflow-hidden p-6 space-y-4"
