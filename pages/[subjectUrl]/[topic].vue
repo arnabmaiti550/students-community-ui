@@ -71,6 +71,9 @@
           </div>
         </div>
       </div>
+      <div v-if="!posts.length" class="text-gray-500 font-bold text-2xl">
+        No Posts Yet.
+      </div>
     </div>
   </div>
 </template>
