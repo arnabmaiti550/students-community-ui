@@ -6,6 +6,10 @@ const getPosts = async (payload) => {
     const { $axios } = useNuxtApp();
     return await $axios.post(`/api/v1/posts`, payload);
 };
+const getQna = async (payload) => {
+    const { $axios } = useNuxtApp();
+    return await $axios.post(`/api/v1/qna`, payload);
+};
 const getMyPosts = async (payload) => {
     const { $axios } = useNuxtApp();
     return await $axios.post(`/api/v1/my-posts`, payload);
@@ -75,5 +79,6 @@ export {
     editReply,
     deleteReply,
     getMyPosts,
-    deletePost
+    deletePost,
+    getQna
 }

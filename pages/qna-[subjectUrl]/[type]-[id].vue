@@ -52,7 +52,6 @@
               &nbsp;{{ post.author.name }}</span
             >
             <span class="text-gray-400 font-light">{{ post.createdAt }}</span>
-            <span class="text-gray-400 font-light">{{ post.type }}</span>
           </div>
 
           <div class="flex space-x-3">
@@ -88,6 +87,8 @@ const filterOptions = [
   { label: "Most Popular", value: "most_popular" },
 ];
 const pageIndex = ref(1);
+const type = ref();
+const types = ["QNA", "Discussion"];
 const runtimeConfig = useRuntimeConfig();
 const postStore = usePostStore();
 const { posts } = storeToRefs(postStore);
@@ -122,14 +123,15 @@ function reRender() {
 }
 async function getPostsList(reload) {
   const payload = {
-    topic: topic.value,
     search: search.value,
     sort: filter.value,
     limit: 10,
     page: pageIndex.value,
   };
+  if (ruote.params.type == "subject") payload.subject = topic.value;
+  else payload.department = topic.value;
   try {
-    await postStore.fetchPostsAction(payload, reload);
+    await postStore.fetchQnaAction(payload, reload);
     reRender();
 
     const item = document.getElementById(`post-${pageIndex.value * 10 - 1}`);
@@ -164,7 +166,7 @@ onMounted(() => {
       getPostsList();
     }
   }, observerOptions);
-  topic.value = ruote.params.topic;
+  topic.value = ruote.params.id;
   getPostsList(true);
   debouncedSearch.value = debounce(searchFilter, 600);
 });

@@ -44,6 +44,16 @@
           option-attribute="name"
         />
       </div>
+
+      <div class="flex mt-4 items-center flex-row space-y-2 md:w-1/2">
+        <label>Post Type &nbsp;</label>
+        <USelectMenu
+          v-model="type"
+          :options="types"
+          placeholder="Select Type"
+          class="w-40 md:w-60"
+        />
+      </div>
       <h3 class="my-2 mt-6 font-bold text-cyan-700 text-sm">
         Make sure to follow Guidelines.
       </h3>
@@ -68,6 +78,7 @@ definePageMeta({
   layout: "no-sidebar",
 });
 const { $toast } = useNuxtApp();
+const loading = ref(false);
 const department = ref("");
 const subject = ref("");
 const topic = ref("");
@@ -77,14 +88,19 @@ const postStore = usePostStore();
 const { departments, subjects, topics } = storeToRefs(subjectStore);
 const title = ref("");
 const router = useRouter();
-const loading = ref(false);
+const type = ref();
+const types = ["QNA", "Discussion"];
+
 async function submitPost() {
   try {
     editorRef.value.getEditorContent();
     const encodedContent = base64.encode(editorRef.value.editorHtml);
     const payload = {
+      department: department.value,
+      subject: subject.value,
       topic: topic.value,
       title: title.value,
+      type: type.value,
       body: encodedContent,
       editorData: editorRef.value.editorContent,
     };

@@ -1,8 +1,25 @@
 <template>
   <div class="layout has-sidebar" v-bind:class="{ rtl }">
     <aside class="sidebar break-point-lg" v-bind:class="{ collapsed, toggled }">
-      <span class="" style="font-size: 1.1rem"> Departments</span>
-      <UAccordion multiple :items="departments" class="mt-6">
+      <div class="" style="font-size: 1.1rem">MENU</div>
+      <UButton
+        color="gray"
+        variant="ghost"
+        class="border-b mt-6 w-full text-green-400 border-gray-200 dark:border-gray-700"
+        :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
+        icon="i-heroicons-clipboard-document-check"
+        @click="router.push(`/test/`)"
+      >
+        <span class="truncate text-gray-700"> Test Zone</span>
+        <template #trailing>
+          <UIcon
+            name="i-heroicons-chevron-right-20-solid"
+            class="w-5 h-5 ms-auto transform transition-transform duration-200"
+            :class="[open && 'rotate-90']"
+          />
+        </template>
+      </UButton>
+      <UAccordion multiple :items="departments">
         <template #default="{ item, open }">
           <UButton
             color="gray"
@@ -24,6 +41,23 @@
         </template>
 
         <template #item="{ item }">
+          <UButton
+            color="gray"
+            variant="ghost"
+            class="w-full border-b pl-8 text-green-600 border-gray-200 dark:border-yellow-600"
+            :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
+            icon="i-heroicons-question-mark-circle"
+            @click="navigateToQna('department', item)"
+          >
+            <span class="truncate text-gray-600"> All QNA</span>
+            <template #trailing>
+              <UIcon
+                name="i-heroicons-chevron-right-20-solid"
+                class="w-5 h-5 ms-auto transform transition-transform duration-200"
+                :class="[open && 'rotate-90']"
+              />
+            </template>
+          </UButton>
           <UAccordion multiple :items="subjects[item._id]">
             <template #default="{ item, open }">
               <UButton
@@ -45,6 +79,16 @@
               </UButton>
             </template>
             <template #item="{ item }">
+              <UButton
+                color="gray"
+                variant="ghost"
+                class="w-full p-3 pl-12 border-b text-green-600 border-gray-200"
+                :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
+                @click="navigateToQna('subject', item)"
+                icon="i-heroicons-question-mark-circle"
+              >
+                <span class="truncate text-gray-500"> All QNA </span>
+              </UButton>
               <div
                 v-for="(topic, i) in topics[item._id]"
                 :key="i"
@@ -72,8 +116,8 @@
       </UAccordion>
     </aside>
     <div class="overlay" v-on:click="setToggled()"></div>
-    <div class="layout">
-      <ScHeader @toggle="setToggled()" />
+    <div class="layout bg-[#edeef5]">
+      <ScHeader @toggle="setToggled()" class="mb-2 md:mb-0" />
 
       <main class="content">
         <div class="grid grid-cols-12 space-x-4">
@@ -230,6 +274,14 @@ function navigateToTopic(topic) {
   const url = `${dep}+${sub}+${top}`;
   router.push(`/${url}/${topic._id}`);
 }
+function navigateToQna(type, topic) {
+  console.log(topic);
+  const dep = slugify(topic.department?.name || "");
+  const sub = slugify(topic.name || "");
+
+  const url = `QNA${dep ? "+" : ""}${dep}+${sub}`;
+  router.push(`/qna-${url}/${type}-${topic._id}`);
+}
 function fetchSubject(item) {
   subjectStore.fetchSubjectsAction(item._id);
 }
@@ -322,7 +374,7 @@ a.btn:hover {
 
 .create-button {
   position: fixed;
-  bottom: 35%;
+  bottom: 5%;
   right: 5%;
   z-index: 10;
 }

@@ -77,6 +77,7 @@
         icon="i-heroicons-bolt"
         variant="outline"
         @click="submitReply"
+        :loading="loading"
         block
         class="mx-auto w-[200px] mt-4 mb-6"
         >{{ editId ? "Update Reply" : "Reply Now" }}</UButton
@@ -233,6 +234,8 @@
 import moment from "moment";
 import base64 from "base-64";
 const id = ref("");
+const { $toast } = useNuxtApp();
+const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
 const postStore = usePostStore();
@@ -270,20 +273,28 @@ async function likeUnlikeHandle() {
     type: "post",
     id: id.value,
   };
-  await postStore.likeUnlikeAction(payload);
+  try {
+    await postStore.likeUnlikeAction(payload);
 
-  liked.value = !liked.value;
-  post.value.likes += liked.value ? 1 : -1;
+    liked.value = !liked.value;
+    post.value.likes += liked.value ? 1 : -1;
+  } catch (err) {
+    $toast.error(err.message);
+  }
 }
 async function likeUnlikeHandleReply(id, i) {
   const payload = {
     type: "reply",
     id: id,
   };
-  await postStore.likeUnlikeAction(payload);
+  try {
+    await postStore.likeUnlikeAction(payload);
 
-  replies.value[i].liked = !replies.value[i].liked;
-  replies.value[i].likes += replies.value[i].liked ? 1 : -1;
+    replies.value[i].liked = !replies.value[i].liked;
+    replies.value[i].likes += replies.value[i].liked ? 1 : -1;
+  } catch (err) {
+    $toast.error(err.message);
+  }
 }
 async function submitReply() {
   try {
@@ -294,6 +305,7 @@ async function submitReply() {
       body: encodedContent,
       editorData: editorRef.value.editorContent,
     };
+    loading.value = true;
     if (!editId.value) await postStore.addReplyAction(payload);
     else postStore.editReplyAction({ id: editId.value, data: payload });
     editId.value = "";
@@ -301,7 +313,10 @@ async function submitReply() {
     editorRef.value.setEditorContent({});
     reRender();
     replyToggle.value = false;
-  } catch (err) {}
+  } catch (err) {
+    $toast.error(err.message);
+  }
+  loading.value = false;
 }
 async function deleteReply() {
   try {
@@ -309,7 +324,9 @@ async function deleteReply() {
     await postStore.getReplyAction(id.value);
     confirmationPopup.value = false;
     reRender();
-  } catch (err) {}
+  } catch (err) {
+    $toast.error(err.message);
+  }
 }
 
 async function deletePost() {
@@ -318,7 +335,9 @@ async function deletePost() {
     confirmationPopup2.value = false;
     history.back();
     reRender();
-  } catch (err) {}
+  } catch (err) {
+    $toast.error(err.message);
+  }
 }
 function setEditReply(reply) {
   replyToggle.value = true;

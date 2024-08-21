@@ -44,6 +44,15 @@
           option-attribute="name"
         />
       </div>
+      <div class="flex mt-4 items-center flex-row space-y-2 md:w-1/2">
+        <label>Post Type &nbsp;</label>
+        <USelectMenu
+          v-model="type"
+          :options="types"
+          placeholder="Select Type"
+          class="w-40 md:w-60"
+        />
+      </div>
 
       <UButton
         color="green"
@@ -51,6 +60,7 @@
         variant="solid"
         @click="updatePost"
         block
+        :loading="loading"
         class="mx-auto w-[200px] mt-4"
         >Save</UButton
       >
@@ -66,6 +76,8 @@ import base64 from "base-64";
 definePageMeta({
   layout: "no-sidebar",
 });
+const { $toast } = useNuxtApp();
+const loading = ref(false);
 const department = ref("");
 const subject = ref("");
 const topic = ref("");
@@ -79,6 +91,8 @@ const { departments, subjects, topics, topicDetails } =
 const { post } = storeToRefs(postStore);
 const title = ref("");
 const id = ref("");
+const type = ref();
+const types = ["QNA", "Discussion"];
 async function updatePost() {
   try {
     editorRef.value.getEditorContent();
@@ -86,13 +100,20 @@ async function updatePost() {
     const data = {
       topic: topic.value,
       title: title.value,
+      type: type.value,
+      department: department.value,
+      subject: subject.value,
       body: encodedContent,
       editorData: editorRef.value.editorContent,
     };
     const payload = { id: id.value, data };
+    loading.value = true;
     const resp = await postStore.editPostAction(payload);
     router.push(`/post/${id.value}/${resp.data.slug}`);
-  } catch (err) {}
+  } catch (err) {
+    $toast.error(err.message);
+  }
+  loading.value = false;
 }
 watch(department, (val) => {
   subjectStore.fetchSubjectsAction(val);

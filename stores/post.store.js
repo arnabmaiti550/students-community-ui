@@ -10,7 +10,7 @@ import {
     likeUnlike,
     uploadFile,
     deleteFile,
-    editReply, deleteReply, getMyPosts, deletePost
+    editReply, deleteReply, getMyPosts, deletePost, getQna
 } from '@/services/post'
 import base64 from "base-64";
 
@@ -52,6 +52,22 @@ export const usePostStore = defineStore("postStore", {
                 if (reload || this.currentTopic != payload.topic) { this.posts = []; this.currentTopic = payload.topic }
                 if (payload.page * 10 > this.posts.length) {
                     const resp = await getPosts(payload);
+                    const datas = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
+                    this.posts = [...this.posts, ...datas]
+                    return resp.data;
+                }
+            } catch (error) {
+                throw Error(
+                    error?.response?.data?.error ||
+                    `Api failed with error: ${error.message}`
+                );
+            }
+        },
+        async fetchQnaAction(payload, reload = false) {
+            try {
+                if (reload) { this.posts = []; }
+                if (payload.page * 10 > this.posts.length) {
+                    const resp = await getQna(payload);
                     const datas = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
                     this.posts = [...this.posts, ...datas]
                     return resp.data;

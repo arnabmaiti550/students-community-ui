@@ -59,6 +59,7 @@
         icon="i-heroicons-check"
         variant="solid"
         @click="saveProfile"
+        :loading="loading"
         size="md"
         block
         class="mx-auto w-[200px] mt-4"
@@ -71,6 +72,8 @@
 definePageMeta({
   layout: "no-sidebar",
 });
+const { $toast } = useNuxtApp();
+const loading = ref(false);
 const name = ref("");
 const userName = ref("");
 const profile = ref("");
@@ -93,6 +96,7 @@ async function saveProfile() {
   payload.value.about = about.value;
   payload.value.topic = topic.value;
   try {
+    loading.value = true;
     if (googleInfo.value.userName) {
       await authStore.registerAction(payload.value);
       router.push(`/redirect`);
@@ -102,8 +106,9 @@ async function saveProfile() {
       router.push(`/profile`);
     }
   } catch (err) {
-    console.log(err);
+    $toast.error(err.message);
   }
+  loading.value = false;
 }
 
 watch(department, (val) => {

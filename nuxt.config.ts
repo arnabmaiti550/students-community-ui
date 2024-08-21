@@ -44,6 +44,7 @@ export default defineNuxtConfig({
       APP_CASHFREE_ENVIRONMENT: process.env.APP_CASHFREE_ENVIRONMENT,
       GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
       STORAGE_URL: process.env.STORAGE_URL,
+      GUIDE: process.env.GUIDE,
     },
   },
 
