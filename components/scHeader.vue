@@ -29,7 +29,7 @@
       /></UTooltip>
       <UTooltip text="Test Zone" :popper="{ arrow: true }">
         <UButton
-          icon="i-heroicons-clipboard-document-check"
+          icon="i-heroicons-trophy"
           size="sm"
           color="gray"
           class="text-blue-400"

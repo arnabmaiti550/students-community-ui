@@ -58,7 +58,7 @@ watch(text, () => {
 onMounted(async () => {
   try {
     await authStore.getUserInfo();
-    if (loggedIn.value) router.push("/redirect");
+    //if (loggedIn.value) router.push("/redirect");
   } catch (err) {}
 });
 </script>

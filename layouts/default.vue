@@ -7,7 +7,7 @@
         variant="ghost"
         class="border-b mt-6 w-full text-green-400 border-gray-200 dark:border-gray-700"
         :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
-        icon="i-heroicons-clipboard-document-check"
+        icon="i-heroicons-trophy"
         @click="router.push(`/test/`)"
       >
         <span class="truncate text-gray-700"> Test Zone</span>
@@ -44,9 +44,10 @@
           <UButton
             color="gray"
             variant="ghost"
-            class="w-full border-b pl-8 text-green-600 border-gray-200 dark:border-yellow-600"
+            v-if="!item.noqna"
+            class="w-full border-b pl-8 text-teal-500 border-gray-200 dark:border-yellow-600"
             :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
-            icon="i-heroicons-question-mark-circle"
+            icon="i-heroicons-signal"
             @click="navigateToQna('department', item)"
           >
             <span class="truncate text-gray-600"> All QNA</span>
@@ -82,10 +83,11 @@
               <UButton
                 color="gray"
                 variant="ghost"
-                class="w-full p-3 pl-12 border-b text-green-600 border-gray-200"
+                v-if="!item.noqna"
+                class="w-full p-3 pl-12 border-b text-teal-500 border-gray-200"
                 :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
                 @click="navigateToQna('subject', item)"
-                icon="i-heroicons-question-mark-circle"
+                icon="i-heroicons-signal"
               >
                 <span class="truncate text-gray-500"> All QNA </span>
               </UButton>
