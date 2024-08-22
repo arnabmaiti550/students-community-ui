@@ -55,10 +55,5 @@ watch(text, () => {
     reRender(); // Assuming reRender is defined somewhere
   });
 });
-onMounted(async () => {
-  try {
-    await authStore.getUserInfo();
-    //if (loggedIn.value) router.push("/redirect");
-  } catch (err) {}
-});
+onMounted(async () => {});
 </script>

@@ -151,5 +151,6 @@ const items = computed(() => {
 });
 onMounted(() => {
   localStorage.setItem("nuxt-color-mode", "light");
+  authStore.getUserInfo();
 });
 </script>

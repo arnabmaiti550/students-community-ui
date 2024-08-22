@@ -50,7 +50,7 @@
             icon="i-heroicons-signal"
             @click="navigateToQna('department', item)"
           >
-            <span class="truncate text-gray-600"> All QNA</span>
+            <span class="truncate text-gray-600"> All Posts</span>
             <template #trailing>
               <UIcon
                 name="i-heroicons-chevron-right-20-solid"
@@ -89,7 +89,7 @@
                 @click="navigateToQna('subject', item)"
                 icon="i-heroicons-signal"
               >
-                <span class="truncate text-gray-500"> All QNA </span>
+                <span class="truncate text-gray-500"> All Posts </span>
               </UButton>
               <div
                 v-for="(topic, i) in topics[item._id]"

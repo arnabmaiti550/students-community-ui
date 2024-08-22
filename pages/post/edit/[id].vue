@@ -44,7 +44,7 @@
           option-attribute="name"
         />
       </div>
-      <div class="flex mt-4 items-center flex-row space-y-2 md:w-1/2">
+      <!-- <div class="flex mt-4 items-center flex-row space-y-2 md:w-1/2">
         <label>Post Type &nbsp;</label>
         <USelectMenu
           v-model="type"
@@ -52,7 +52,7 @@
           placeholder="Select Type"
           class="w-40 md:w-60"
         />
-      </div>
+      </div> -->
 
       <UButton
         color="green"

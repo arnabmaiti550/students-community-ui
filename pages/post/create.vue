@@ -45,7 +45,7 @@
         />
       </div>
 
-      <div class="flex mt-4 items-center flex-row space-y-2 md:w-1/2">
+      <!-- <div class="flex mt-4 items-center flex-row space-y-2 md:w-1/2">
         <label>Post Type &nbsp;</label>
         <USelectMenu
           v-model="type"
@@ -53,7 +53,7 @@
           placeholder="Select Type"
           class="w-40 md:w-60"
         />
-      </div>
+      </div> -->
       <h3 class="my-2 mt-6 font-bold text-cyan-700 text-sm">
         Make sure to follow Guidelines.
       </h3>
