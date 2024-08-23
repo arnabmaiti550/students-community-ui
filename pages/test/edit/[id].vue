@@ -438,12 +438,8 @@ async function submitTest() {
     payload.questions = [...tempQuestions.value].map((el) => {
       const regex =
         /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-      el.question = regex.test(el.question)
-        ? el.question
-        : utf8ToHex(el.question);
-      el.solution = regex.test(el.solution)
-        ? el.solution
-        : utf8ToHex(el.solution);
+      el.question = utf8ToHex(el.question);
+      el.solution = utf8ToHex(el.solution);
       return el;
     });
 

@@ -109,9 +109,7 @@ export const useTestStore = defineStore("testStore", {
                 let temp = resp.data.data;
                 const regex =
                     /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-                temp.description = regex.test(temp.description)
-                    ? hexToUtf8(temp.description)
-                    : temp.description;
+                temp.description = hexToUtf8(temp.description);
 
                 temp.questions = temp.questions
                     .map(el => {
