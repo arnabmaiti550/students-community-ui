@@ -77,6 +77,7 @@ definePageMeta({
   layout: "no-sidebar",
 });
 const { $toast } = useNuxtApp();
+const { utf8ToHex, hexToUtf8 } = useHexEncoding();
 const loading = ref(false);
 const department = ref("");
 const subject = ref("");
@@ -96,7 +97,7 @@ const types = ["QNA", "Discussion"];
 async function updatePost() {
   try {
     editorRef.value.getEditorContent();
-    const encodedContent = base64.encode(editorRef.value.editorHtml);
+    const encodedContent = utf8ToHex(editorRef.value.editorHtml);
     const data = {
       topic: topic.value,
       title: title.value,

@@ -87,7 +87,10 @@
       <div class="border-b">
         <div class="preview-area ql-editor" v-html="reply.body"></div>
         <div class="flex space-x-3 p-2 mb-4 text-sm">
-          <div class="text-[#396791] cursor-pointer flex items-center">
+          <div
+            class="text-[#396791] cursor-pointer flex items-center"
+            @click="router.push(`/profile/${reply.user?._id}`)"
+          >
             <UAvatar
               size="xs"
               icon="i-heroicons-user-circle"
@@ -235,6 +238,7 @@ import moment from "moment";
 import base64 from "base-64";
 const id = ref("");
 const { $toast } = useNuxtApp();
+const { utf8ToHex, hexToUtf8 } = useHexEncoding();
 const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
@@ -299,7 +303,7 @@ async function likeUnlikeHandleReply(id, i) {
 async function submitReply() {
   try {
     editorRef.value.getEditorContent();
-    const encodedContent = base64.encode(editorRef.value.editorHtml);
+    const encodedContent = utf8ToHex(editorRef.value.editorHtml);
     const payload = {
       postId: id.value,
       body: encodedContent,

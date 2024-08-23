@@ -13,7 +13,7 @@ import {
     editReply, deleteReply, getMyPosts, deletePost, getQna
 } from '@/services/post'
 import base64 from "base-64";
-
+const { utf8ToHex, hexToUtf8 } = useHexEncoding();
 export const usePostStore = defineStore("postStore", {
     state: () => ({
         posts: [],
@@ -52,7 +52,7 @@ export const usePostStore = defineStore("postStore", {
                 if (reload || this.currentTopic != payload.topic) { this.posts = []; this.currentTopic = payload.topic }
                 if (payload.page * 10 > this.posts.length) {
                     const resp = await getPosts(payload);
-                    const datas = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
+                    const datas = resp.data.data.map(el => { el.body = hexToUtf8(el.body) || el.body; return el; })
                     this.posts = [...this.posts, ...datas]
                     return resp.data;
                 }
@@ -68,7 +68,7 @@ export const usePostStore = defineStore("postStore", {
                 if (reload) { this.posts = []; }
                 if (payload.page * 10 > this.posts.length) {
                     const resp = await getQna(payload);
-                    const datas = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
+                    const datas = resp.data.data.map(el => { el.body = hexToUtf8(el.body) || el.body; return el; })
                     this.posts = [...this.posts, ...datas]
                     return resp.data;
                 }
@@ -84,7 +84,7 @@ export const usePostStore = defineStore("postStore", {
                 if (reload) { this.posts = []; }
                 if (payload.page * 20 > this.posts.length) {
                     const resp = await getMyPosts(payload);
-                    const datas = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
+                    const datas = resp.data.data.map(el => { el.body = hexToUtf8(el.body) || el.body; return el; })
                     this.posts = [...this.posts, ...datas]
                     return resp.data;
                 }
@@ -127,7 +127,7 @@ export const usePostStore = defineStore("postStore", {
             try {
                 const resp = await getPostById(payload);
                 this.post = resp.data.data
-                this.post.body = base64.decode(this.post.body) || this.post.body
+                this.post.body = hexToUtf8(this.post.body) || this.post.body
                 return resp.data;
             } catch (error) {
                 throw Error(
@@ -140,7 +140,7 @@ export const usePostStore = defineStore("postStore", {
             try {
                 const resp = await getDetailPostById(payload);
                 this.post = resp.data.data
-                this.post.body = base64.decode(this.post.body) || this.post.body
+                this.post.body = hexToUtf8(this.post.body) || this.post.body
                 return resp.data;
             } catch (error) {
                 throw Error(
@@ -186,7 +186,7 @@ export const usePostStore = defineStore("postStore", {
             try {
                 this.replies = [];
                 const resp = await getReply(id);
-                this.replies = resp.data.data.map(el => { el.body = base64.decode(el.body) || el.body; return el; })
+                this.replies = resp.data.data.map(el => { el.body = hexToUtf8(el.body) || el.body; return el; })
                 return resp.data;
             } catch (error) {
                 throw Error(

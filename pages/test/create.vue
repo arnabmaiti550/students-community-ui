@@ -94,6 +94,7 @@ definePageMeta({
   layout: "no-sidebar",
 });
 const testStore = useTestStore();
+const { utf8ToHex, hexToUtf8 } = useHexEncoding();
 const subjectStore = useSubjectStore();
 const { departments, subjects, topics } = storeToRefs(subjectStore);
 const department = ref("");
@@ -140,7 +141,7 @@ async function submitTest() {
       .asSeconds(),
   };
 
-  payload.description = base64.encode(testDescription.value?.editorHtml);
+  payload.description = utf8ToHex(testDescription.value?.editorHtml);
   payload.descriptionData = testDescription.value?.editorContent;
 
   if (subject.value.length) payload.subject = subject.value;

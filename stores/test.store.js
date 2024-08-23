@@ -12,7 +12,7 @@ import {
     deleteTest
 } from '@/services/tests'
 import base64 from "base-64";
-
+const { utf8ToHex, hexToUtf8 } = useHexEncoding();
 export const useTestStore = defineStore("testStore", {
     state: () => ({
         tests: [],
@@ -110,13 +110,13 @@ export const useTestStore = defineStore("testStore", {
                 const regex =
                     /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
                 temp.description = regex.test(temp.description)
-                    ? base64.decode(temp.description)
+                    ? hexToUtf8(temp.description)
                     : temp.description;
 
                 temp.questions = temp.questions
                     .map(el => {
-                        el.question = base64.decode(el.question) || el.question;
-                        el.solution = base64.decode(el.solution) || el.solution;
+                        el.question = hexToUtf8(el.question) || el.question;
+                        el.solution = hexToUtf8(el.solution) || el.solution;
                         return el;
                     });
                 this.test = temp
@@ -133,10 +133,10 @@ export const useTestStore = defineStore("testStore", {
             try {
                 const resp = await getTestByIdLtd(id);
                 let temp = resp.data.data;
-                temp.description = base64.decode(temp.description)
+                temp.description = hexToUtf8(temp.description)
                 temp.questions = temp.questions
                     .map(el => {
-                        el.question = base64.decode(el.question) || el.question;
+                        el.question = hexToUtf8(el.question) || el.question;
 
                         return el;
                     });
@@ -194,11 +194,11 @@ export const useTestStore = defineStore("testStore", {
             try {
                 const resp = await getTestResult(id);
                 let temp = resp.data.data;
-                temp.description = base64.decode(temp.description)
+                temp.description = hexToUtf8(temp.description)
                 temp.questions = temp.questions
                     .map(el => {
-                        el.question = base64.decode(el.question) || el.question;
-                        el.solution = base64.decode(el.solution) || el.solution;
+                        el.question = hexToUtf8(el.question) || el.question;
+                        el.solution = hexToUtf8(el.solution) || el.solution;
                         return el;
                     });
                 this.test = temp

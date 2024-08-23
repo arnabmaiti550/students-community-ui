@@ -368,6 +368,7 @@ definePageMeta({
   layout: "no-sidebar",
 });
 const testStore = useTestStore();
+const { utf8ToHex, hexToUtf8 } = useHexEncoding();
 const subjectStore = useSubjectStore();
 const { departments, subjects, topics } = storeToRefs(subjectStore);
 const { test } = storeToRefs(testStore);
@@ -430,7 +431,7 @@ async function submitTest() {
   };
 
   if (testDescription.value?.editorHtml) {
-    payload.description = base64.encode(testDescription.value?.editorHtml);
+    payload.description = utf8ToHex(testDescription.value?.editorHtml);
     payload.descriptionData = testDescription.value?.editorContent;
   }
   if (tempQuestions.value.length)
@@ -439,10 +440,10 @@ async function submitTest() {
         /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
       el.question = regex.test(el.question)
         ? el.question
-        : base64.encode(el.question);
+        : utf8ToHex(el.question);
       el.solution = regex.test(el.solution)
         ? el.solution
-        : base64.encode(el.solution);
+        : utf8ToHex(el.solution);
       return el;
     });
 

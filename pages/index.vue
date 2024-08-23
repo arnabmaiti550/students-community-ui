@@ -43,6 +43,7 @@ const router = useRouter();
 const text = ref("");
 const runtimeConfig = useRuntimeConfig();
 const authStore = useAuthStore();
+const { utf8ToHex, hexToUtf8 } = useHexEncoding();
 const { token, loggedIn } = storeToRefs(authStore);
 function reRender() {
   if (MathJax) {
@@ -55,5 +56,11 @@ watch(text, () => {
     reRender(); // Assuming reRender is defined somewhere
   });
 });
-onMounted(async () => {});
+onMounted(async () => {
+  const content = "<p>你好, мир! hi 😁😁😍</p>";
+  const encodedContent = utf8ToHex(content);
+  console.log("encoded ", encodedContent);
+  const decodedContent = hexToUtf8(encodedContent);
+  console.log("decoded ", decodedContent);
+});
 </script>
