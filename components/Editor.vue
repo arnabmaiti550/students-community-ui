@@ -55,20 +55,18 @@ let updateHandler;
 let currentMedia = [];
 
 const toolbarOptions = [
-  ["bold", "italic", "underline", "strike"], // toggled buttons
+  ["bold", "italic", "underline", "strike"],
   ["blockquote", "code-block"],
-  ["link", "image", "video", "formula"],
-
-  [{ header: 1 }, { header: 2 }], // custom button values
+  ["link", "image", "video", "attachment", "formula"],
+  [{ header: 1 }, { header: 2 }],
   [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
-  [{ script: "sub" }, { script: "super" }], // superscript/subscript
-  [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
-  [{ direction: "rtl" }], // text direction
-
+  [{ script: "sub" }, { script: "super" }],
+  [{ indent: "-1" }, { indent: "+1" }],
+  [{ direction: "rtl" }],
   [{ align: [] }],
-
   ["clean"], // remove formatting button
 ];
+
 const loadScript = (src) => {
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
@@ -160,7 +158,31 @@ onMounted(async () => {
       const Video = Quill.import("formats/video");
       const Link = Quill.import("formats/link");
       const Image = Quill.import("formats/image");
+      const BlockEmbed = Quill.import("blots/block/embed");
       console.log(Image);
+
+      class IframeEmbed extends BlockEmbed {
+        static create(value) {
+          let node = super.create();
+          node.setAttribute("src", value.url);
+          node.setAttribute("frameborder", "0");
+          node.setAttribute("allowfullscreen", true);
+          node.setAttribute("style", "width: 100%; height: 600px;");
+          return node;
+        }
+
+        static value(node) {
+          return {
+            url: node.getAttribute("src"),
+          };
+        }
+      }
+
+      // Register the blot with Quill
+      IframeEmbed.blotName = "iframe";
+      IframeEmbed.tagName = "iframe";
+      Quill.register(IframeEmbed);
+
       class CoustomVideo extends Video {
         static create(value) {
           // console.log(tempVideo.value, value);
@@ -229,6 +251,7 @@ onMounted(async () => {
 
       Quill.register("formats/video", CoustomVideo);
       Quill.register("formats/video", CoustomImage);
+
       Quill.register("modules/imageHandler", ImageHandler);
       Quill.register("modules/videoHandler", VideoHandler);
       Quill.register("modules/attachmentHandler", AttachmentHandler);
@@ -275,17 +298,56 @@ onMounted(async () => {
             upload: async (file) => {
               try {
                 const data = await fileUploader(file);
+                const url = runtimeConfig.public.STORAGE_URL + data.data;
+                const range = quill.getSelection();
+                //  quill.insertEmbed(range.index, "link", { url: url });
+
+                if (file.type === "application/pdf") {
+                  quill.insertEmbed(range.index, "iframe", {
+                    url: url,
+                  });
+                } else {
+                  quill.insertText(range.index, file.name, "link", url);
+                }
+                quill.setSelection(range.index + 1);
                 return runtimeConfig.public.STORAGE_URL + data.data;
               } catch (err) {
                 console.log(err);
               }
             },
+            accept: ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx",
           },
         },
 
         theme: "snow",
       });
 
+      const attachmentButton = document.querySelector(".ql-attachment");
+      attachmentButton.addEventListener("click", () => {
+        const input = document.createElement("input");
+        input.setAttribute("type", "file");
+        input.setAttribute("accept", ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx");
+        input.click();
+
+        input.onchange = () => {
+          const file = input.files[0];
+          if (file) {
+            // Use the AttachmentHandler to upload the file
+            console.log(quill.options.modules.attachmentHandler);
+            quill.options.modules.attachmentHandler
+              ?.upload(file)
+              .then((url) => {
+                console.log(url);
+                const range = quill.getSelection();
+                // quill.clipboard.dangerouslyPasteHTML(
+                //   range.index,
+                //   `<a href="${url}" download="${file.name}">${file.name}</a>`
+                // );
+              })
+              .catch((err) => console.error("File upload failed", err));
+          }
+        };
+      });
       // Enable syntax highlighting
       quill.on("text-change", (delta, oldDelta, source) => {
         updateHandler();
@@ -307,7 +369,18 @@ onMounted(async () => {
             }
           });
         }
-
+        quill.root.addEventListener("keydown", (event) => {
+          if (event.key === "Backspace" || event.key === "Delete") {
+            const range = quill.getSelection();
+            if (range) {
+              const [blot] = quill.getLeaf(range.index);
+              if (blot && blot.domNode.tagName === "IFRAME") {
+                event.preventDefault();
+                quill.deleteText(range.index - 1, 2); // Adjust range if needed
+              }
+            }
+          }
+        });
         const blocks = document.querySelectorAll("pre code");
         blocks.forEach((block) => {
           hljs.highlightElement(block);
