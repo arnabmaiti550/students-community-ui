@@ -257,12 +257,30 @@ const liked = ref(false);
 function getFormattedDate(date) {
   return moment(date).format("DD/MM/YYYY");
 }
+function stripHtml(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+}
 async function fetchPostById() {
   await postStore.getPostByIdAction(id.value);
+  const metaDesc = stripHtml(post.value.body).slice(0, 160);
+  useHead({
+    title: post.value.title,
+    meta: [{ name: "description", content: metaDesc }],
+  });
+
+  useSeoMeta({
+    title: post.value.title,
+    ogTitle: post.value.title,
+    description: metaDesc,
+    ogDescription: metaDesc,
+    ogImage:
+      "https://storage.googleapis.com/sc-bucket-1108/uploads/sc-demo.jpeg",
+    twitterCard: "summary_large_image",
+  });
   document.getElementById("post-body").innerHTML = post.value.body;
   liked.value = post.value.liked;
-  reRender();
-  await postStore.getReplyAction(id.value);
   reRender();
 }
 function reRender() {
@@ -352,8 +370,10 @@ function setEditReply(reply) {
     element.scrollIntoView({ behavior: "smooth" });
   }, 200);
 }
-onMounted(() => {
+onBeforeMount(async () => {
   id.value = route.params.id;
-  fetchPostById();
+  await fetchPostById();
+  await postStore.getReplyAction(id.value);
+  reRender();
 });
 </script>

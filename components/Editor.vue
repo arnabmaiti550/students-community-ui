@@ -159,7 +159,6 @@ onMounted(async () => {
       const Link = Quill.import("formats/link");
       const Image = Quill.import("formats/image");
       const BlockEmbed = Quill.import("blots/block/embed");
-      console.log(Image);
 
       class IframeEmbed extends BlockEmbed {
         static create(value) {
@@ -167,7 +166,7 @@ onMounted(async () => {
           node.setAttribute("src", value.url);
           node.setAttribute("frameborder", "0");
           node.setAttribute("allowfullscreen", true);
-          node.setAttribute("style", "width: 100%; height: 600px;");
+          node.setAttribute("style", "width: 100%; height: 400px;");
           return node;
         }
 
@@ -218,7 +217,6 @@ onMounted(async () => {
       CoustomVideo.tagName = "DIV";
       class CoustomImage extends Image {
         static create(value) {
-          console.log(value instanceof File || value instanceof Blob, value);
           if (isBase64DataURI(value)) {
             uploadImage(base64ToFile(value, "my-image"));
             return;
@@ -333,11 +331,9 @@ onMounted(async () => {
           const file = input.files[0];
           if (file) {
             // Use the AttachmentHandler to upload the file
-            console.log(quill.options.modules.attachmentHandler);
             quill.options.modules.attachmentHandler
               ?.upload(file)
               .then((url) => {
-                console.log(url);
                 const range = quill.getSelection();
                 // quill.clipboard.dangerouslyPasteHTML(
                 //   range.index,
